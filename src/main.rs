@@ -18,46 +18,53 @@ fn main() {
     let events_loop = EventLoop::new();
 
     let mut instance = Instance::new(
-        Display::new(WindowBuilder::new(), ContextBuilder::new(), &events_loop).unwrap(),
+        Display::new(WindowBuilder::new(), ContextBuilder::new().with_depth_buffer(24), &events_loop).unwrap(),
         vec![
             Candy {
-                pos: [1.0, 0.0],
+                pos: [0.0, 0.0],
                 t: candy::Type::Normal(0),
+            },
+            Candy {
+                pos: [1.0, 0.0],
+                t: candy::Type::Normal(1),
+            },
+            Candy {
+                pos: [0.0, 1.0],
+                t: candy::Type::Normal(2),
             },
         ],
     );
-
-    let mut view: Matrix4<f32> = cgmath::perspective(cgmath::Deg(90.0), 16.0 / 9.0, 0.1, 10.0);
-    view = view
-        * Matrix4::from_translation(cgmath::Vector3 {
-            x: 0.0,
-            y: 0.0,
-            z: -3.0,
-        });
-
+    
+    
+    
     let mut refresh_rate = REFRESH_RATES[0];
 
     events_loop.run(move |event, _target, control_flow| {
+        
         let now = time::Instant::now();
 
         if now >= instance.next_frame_instant {
             instance.draw();
             instance.update(now, refresh_rate);
         }
-
+        
         match event {
             glutin::event::Event::WindowEvent { event, .. } => match event {
                 glutin::event::WindowEvent::CloseRequested => {
                     *control_flow = glutin::event_loop::ControlFlow::Exit;
                     return;
                 }
-                glutin::event::WindowEvent::Resized(_) => {
+                glutin::event::WindowEvent::Resized(size) => {
+                    instance.view = cgmath::perspective(cgmath::Deg(90.0), size.width as f32/size.height as f32, 0.1, 100.0);
                     instance.draw();
                 }
                 _ => (),
             },
+            
             _ => (),
         }
+        
         control_flow.set_wait_until(instance.next_frame_instant);
+        
     });
 }

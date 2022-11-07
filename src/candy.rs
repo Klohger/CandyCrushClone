@@ -20,42 +20,48 @@ pub type Color = usize;
 
 #[derive(Clone, Copy)]
 pub struct Vertex {
-    position: [f32; 2],
+    verts: [f32; 2],
 }
-glium::implement_vertex!(Vertex, position);
+glium::implement_vertex!(Vertex, verts);
 
-pub const MESH: [Vertex; 3] = [
+pub const MESH: [Vertex; 4] = [
     Vertex {
-        position: [-0.5, -0.5],
+        verts: [-0.5, -0.5],
     },
     Vertex {
-        position: [0.5, -0.5],
+        verts: [0.5, -0.5],
     },
     Vertex {
-        position: [0.0, 0.5],
+        verts: [0.5, 0.5],
+    },
+    Vertex {
+        verts: [-0.5, 0.5],
     },
 ];
-pub const INDICES: [u16; 3] = [0u16, 1, 2];
+pub const INDICES: [u16; 6] = [0, 1, 2, 2, 3, 0];
 
 pub const VERTEX_SHADER_SRC: &str = r#"
     #version 140
 
-    in vec2 pos;
+    in vec2 verts;
+    uniform vec2 pos;
+    uniform mat4 view;
     void main() {
-        gl_Position = vec4(position, 0.0, 1.0);
+        gl_Position = vec4(verts + pos, 0.0, 1.0);
     }
 "#;
 
 pub const FRAGMENT_SHADER_SRC: &str = r#"
     #version 140
     out vec4 color;
+    uniform vec3 candyColor;
     void main() {
-        color = vec4(1.0,1.0,0.0,1.0);
+        color = vec4(candyColor,1.0);
     }
 "#;
 
 pub const DEBUG_COLORS : [[f32;3]; 3] = [
-    [1.0,1.0,1.0],
-    [1.0,1.0,1.0],
-    [1.0,1.0,1.0],
+    [1.0,0.0,0.0],
+    [0.0,1.0,0.0],
+    [0.0,0.0,1.0],
 ];
