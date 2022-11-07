@@ -2,7 +2,7 @@ use crate::candy::{self, Candy};
 use cgmath::{Matrix4, Vector3};
 use glium::{
     self,
-    index::{self, IndexBuffer, PrimitiveType},
+    index::{IndexBuffer, PrimitiveType},
     uniform, Display, Surface, VertexBuffer,
 };
 use std::time;
