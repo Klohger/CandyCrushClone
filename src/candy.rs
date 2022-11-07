@@ -49,21 +49,28 @@ pub const VERTEX_SHADER_SRC: &str = r#"
     #version 140
 
     in vec2 verts;
-    in vec2 uvCoords;
+    in vec2 uv_coords;
+    out vec2 texCoords;
+
     uniform vec2 pos;
     uniform mat4 view;
+    uniform mat4 camera;
     void main() {
-        gl_Position = view * vec4(verts + pos, -1.0, 1.0);
+        texCoords = uv_coords;
+        gl_Position = view * camera * vec4(verts + pos, -1.0, 1.0) ;
     }
 "#;
 
 pub const FRAGMENT_SHADER_SRC: &str = r#"
     #version 140
+    
+    in vec2 texCoords;
     out vec4 color;
-    uniform vec3 candyColor;
+
+    uniform sampler2DArray tex;
+    uniform float colorId;
+
     void main() {
-        color = vec4(candyColor,1.0);
+        color = texture(tex, vec3(texCoords, colorId));
     }
 "#;
-
-pub const DEBUG_COLORS: [[f32; 3]; 3] = [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0]];
