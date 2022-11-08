@@ -58,8 +58,12 @@
  ::START
  ::::::::::::::::::::::::::::
  REM Run shell as admin (example) - put here code as you like
-mkdir "%~dp0target\debug"
-mklink /D "%~dp0target\debug\data" "%~dp0data"
 
-mkdir "%~dp0target\release"
-mklink /D "%~dp0target\release\data" "%~dp0data"
+mklink /D "%~dp0unity\assets\data" "%~dp0data"
+::mkdir "%~dp0crate\target\debug"
+mklink /D "%~dp0crate\target\debug\data" "%~dp0data"
+
+::mkdir "%~dp0crate\target\release"
+mklink /D "%~dp0crate\target\release\data" "%~dp0data"
+
+pause
