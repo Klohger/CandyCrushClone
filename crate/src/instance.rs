@@ -7,6 +7,7 @@ use glium::{
     texture::{SrgbTexture2dArray}, glutin,
 };
 use glium::glutin::event::VirtualKeyCode as Key;
+use glutin::platform::run_return::EventLoopExtRunReturn;
 use image::{io::Reader as ImageReader};
 use winit::{event_loop::EventLoop, event::MouseScrollDelta};
 use std::{time};
@@ -16,7 +17,7 @@ pub struct Instance<'a> {
     pub view : Matrix4<f32>,
     pub camera : Matrix4<f32>,
     pub display: &'a Display,
-    pub events_loop : &'a EventLoop<()>,
+    pub events_loop : &'a mut EventLoop<()>,
     delta: time::Duration,
     pub next_frame_instant: time::Instant,
     candies: Vec<Candy>,
@@ -31,23 +32,23 @@ impl<'a> Instance<'a> {
 
     pub const REFRESH_RATES: [time::Duration; 2] = [time::Duration::from_nanos(16_666_667), time::Duration::from_nanos(15_625_000)];
 
-    pub fn draw(&self) {
-        let mut frame = self.display.draw();
+    pub fn draw(this : &mut Instance) {
+        let mut frame = this.display.draw();
         frame.clear_color(0.0, 0.0, 0.0, 1.0);
-        for candy in &self.candies {
+        for candy in &this.candies {
             if let candy::Type::Normal(color) = candy.t {
-                let view : [[f32;4];4] = self.view.into();
-                let camera : [[f32;4];4] = self.camera.invert().unwrap().into();
+                let view : [[f32;4];4] = this.view.into();
+                let camera : [[f32;4];4] = this.camera.invert().unwrap().into();
                 frame
                     .draw(
-                        &self.candy_vert_buf,
-                        &self.candy_ind_buf,
-                        &self.candy_prog,
+                        &this.candy_vert_buf,
+                        &this.candy_ind_buf,
+                        &this.candy_prog,
                         &uniform! {
                             pos: candy.pos, 
                             view: view,
                             camera: camera,
-                            tex: glium::uniforms::Sampler(&self.candy_textures, self.sampler_behaviour),
+                            tex: glium::uniforms::Sampler(&this.candy_textures, this.sampler_behaviour),
                             colorId: color as f32,
                         },
                         &glium::DrawParameters { 
@@ -61,7 +62,7 @@ impl<'a> Instance<'a> {
 
         frame.finish().unwrap();
     }
-    pub fn new(display: &'a Display, events_loop : &'a EventLoop<()>, candies: Vec<Candy>) -> Self {
+    pub fn new(display: &'a Display, events_loop : &'a mut EventLoop<()>, candies: Vec<Candy>) -> Self {
         let candy_vert_buf = VertexBuffer::new(display, &candy::MESH).unwrap();
         let candy_ind_buf =
             IndexBuffer::new(display, PrimitiveType::TrianglesList, &candy::INDICES).unwrap();
@@ -140,11 +141,12 @@ impl<'a> Instance<'a> {
         self.input.update_has_ran()
     }
     pub fn Run(&mut self, refresh_rate: time::Duration) -> Option<Instance<'a>> {
-        self.events_loop.run(|event, _target, control_flow| {
-
+        
+        self.events_loop.run_return(|event, _target, control_flow|{
+            
         });
-/*
-        self.events_loop.run(move |event, _target, control_flow| {
+        /*
+        self.events_loop.run_return(|event, _target, control_flow| {
         
             let now = time::Instant::now();
     
@@ -190,7 +192,10 @@ impl<'a> Instance<'a> {
             control_flow.set_wait_until(self.next_frame_instant);
             
         });
-*/
+        */
         return None;
+    }
+    pub fn event_handler(event : glutin::event::Event<'_, ()>, target : &glutin::event_loop::EventLoopWindowTarget<()>, control_flow : &mut glutin::event_loop::ControlFlow) {
+
     }
 }

@@ -4,6 +4,7 @@ use glium::{
     Display,
 };
 use instance::Instance;
+use winit::event_loop::EventLoopBuilder;
 
 
 mod candy;
@@ -11,7 +12,6 @@ mod instance;
 mod input;
 mod stage;
 mod tile;
-
 
 
 use crate::candy::Candy;
@@ -27,12 +27,12 @@ fn LoadImage(filePath : String) {
 
 fn main() {
 
-    let events_loop = EventLoop::new();
+    let mut events_loop : EventLoop<())> = EventLoopBuilder::new().build();
     let display = Display::new(WindowBuilder::new(), ContextBuilder::new().with_depth_buffer(24), &events_loop).unwrap();
     
     let mut instance = Instance::new(
         &display,
-        &events_loop,
+        &mut events_loop,
         vec![
             Candy {
                 pos: [0.0, 0.0],
