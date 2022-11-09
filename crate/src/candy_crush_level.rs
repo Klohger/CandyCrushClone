@@ -3,7 +3,7 @@ use std::time;
 use cgmath::{Matrix4, Vector3, Deg, SquareMatrix};
 use glium::{VertexBuffer, IndexBuffer, texture::SrgbTexture2dArray, index::PrimitiveType, Surface, uniform, Display};
 
-use crate::{input::{Input, KeyState}, candy::{self, Candy}, scene::Scene, instance::Instance};
+use crate::{input::{Input, KeyState}, candy::{self, Candy}, scene::Scene};
 use image::{io::Reader as ImageReader};
 use winit::event::VirtualKeyCode as Key;
 

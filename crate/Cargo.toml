@@ -8,10 +8,8 @@ edition = "2021"
 [dependencies]
 winit = "*"
 glium = "*"
-send_wrapper = "*"
 cgmath = "*"
 image = "*"
-once_cell = "*"
 
 
 [profile.release]

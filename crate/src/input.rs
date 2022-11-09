@@ -201,7 +201,7 @@ macro_rules! init_key_map {
     }};
 }
 
-use glium::glutin;
+
 use std::{self, collections::HashMap};
 use winit::{event::{ElementState, KeyboardInput, VirtualKeyCode, MouseScrollDelta}, dpi::PhysicalPosition};
 

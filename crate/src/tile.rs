@@ -8,7 +8,7 @@ pub struct Tile<'a> {
 
 
 pub struct Tile {
-    entrancePosition : Option<(usize,usize)>,
+    entrance_position : Option<(usize,usize)>,
     look : usize,
     previous : Option<(usize,usize)>,
     next : Option<(usize,usize)>,

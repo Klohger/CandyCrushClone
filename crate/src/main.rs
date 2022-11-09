@@ -3,17 +3,15 @@ use std::time;
 use candy_crush_level::CandyCrushLevel;
 //#![windows_subsystem = "windows"]
 use glium::{
-    glutin::{event_loop::EventLoop, window::WindowBuilder, ContextBuilder},
+    glutin::{event_loop::EventLoop, window::WindowBuilder, ContextBuilder, self},
     Display,
 };
-use instance::Instance;
 use scene::Scene;
-use winit::{event_loop::EventLoopBuilder, platform::run_return::EventLoopExtRunReturn};
+use winit::{event_loop::EventLoopBuilder, platform::run_return::EventLoopExtRunReturn, event::MouseScrollDelta};
 
 mod candy;
 mod candy_crush_level;
 mod input;
-mod instance;
 mod scene;
 mod stage;
 mod tile;
@@ -28,6 +26,11 @@ fn LoadImage(filePath : String) {
     let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
 }
 */
+
+const REFRESH_RATES: [time::Duration; 2] = [
+        time::Duration::from_nanos(16_666_667),
+        time::Duration::from_nanos(15_625_000),
+];
 
 fn main() {
     let mut events_loop = EventLoop::new();
@@ -60,13 +63,59 @@ fn main() {
         CandyCrushLevel::draw,
         CandyCrushLevel::get_next_scene,
     );
-    let refresh_rate = Instance::REFRESH_RATES[1];
+    let mut should_exit = false;
+    let refresh_rate = REFRESH_RATES[1];
     events_loop.run(move |event, _target, control_flow| {
         let now = time::Instant::now();
 
         if now >= scene.data.next_frame_instant {
             (scene.draw)(&scene.data, &display);
-            (scene.update)(&mut scene.data, &display, now, refresh_rate);
+            if (scene.update)(&mut scene.data, &display, now, refresh_rate) {
+                match (scene.get_next_scene)(&scene.data) {
+                    Some(new_scene) => {scene = new_scene},
+                    None => should_exit = true, 
+                } 
+            }
+        }
+
+        if(should_exit) {
+            *control_flow = glutin::event_loop::ControlFlow::Exit; 
+        } else {
+            match event {
+                glutin::event::Event::WindowEvent { window_id: _, event } => match event {
+                    glutin::event::WindowEvent::CloseRequested => {
+                        *control_flow = glutin::event_loop::ControlFlow::Exit;
+                        return;
+                    }
+                    glutin::event::WindowEvent::Resized(size) => {
+                        scene.data.view = cgmath::perspective(cgmath::Deg(90.0),size.width as f32/ size.height as f32,0.05,100.0);
+    
+                    }
+                    _ => (),
+                },
+                glutin::event::Event::RedrawRequested(_) => {
+                    (scene.draw)(&scene.data, &display);
+                }
+                glutin::event::Event::DeviceEvent { device_id: _, event } => match event {
+                    glutin::event::DeviceEvent::Key(key) => {
+                        scene.data.input.poll_keys(key);
+                    }
+                    glutin::event::DeviceEvent::MouseMotion { delta } => {
+                        scene.data.input.poll_mouse(delta);
+                    }
+                    glutin::event::DeviceEvent::MouseWheel { delta } => {
+    
+                        match delta {
+                            MouseScrollDelta::LineDelta(x, y) => scene.data.input.poll_scroll((x,y)),
+                            _ => (),
+                        }
+                    }
+                    _ => (),
+                }
+                _ => (),
+            }
+    
+            control_flow.set_wait_until(scene.data.next_frame_instant);
         }
     });
     /*
