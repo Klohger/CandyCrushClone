@@ -6,11 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-winit = {path = "../winit"}
-glium = {path = "../glium"}
+winit = "*"
+glium = "*"
+send_wrapper = "*"
 cgmath = "*"
 image = "*"
-
+once_cell = "*"
 
 
 [profile.release]
