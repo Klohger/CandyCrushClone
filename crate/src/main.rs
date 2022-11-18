@@ -1,6 +1,10 @@
 #![windows_subsystem = "windows"]
 
-use std::{any::Any, ptr, time::{self, Duration}};
+use std::{
+    any::Any,
+    ptr,
+    time::{self, Duration},
+};
 
 //use asset::{TextureAsset, Asset};
 //use ball::Ball;
@@ -14,6 +18,7 @@ use glium::{
     Blend, BlendingFunction, Display,
 };
 
+use image::Frames;
 use object::Object;
 use rodio::Source;
 use scene::Scene;
@@ -153,12 +158,10 @@ unsafe fn title(context: &Context) -> Scene {
                 model: Matrix4::from_translation(vec3(1.0, -1.0, -4.0)).into(),
                 ..Default::default()
             }),
-            
             Box::new(component::MeshRenderer {
                 mesh: &context.meshes["exit"],
                 prog: &context.shader_programs["door"],
-                uniforms: DynamicUniforms(collection! {
-                }),
+                uniforms: DynamicUniforms(collection! {}),
                 draw_parameters: glium::DrawParameters {
                     depth: glium::Depth {
                         test: glium::draw_parameters::DepthTest::IfLess,
@@ -169,7 +172,21 @@ unsafe fn title(context: &Context) -> Scene {
                 },
                 transform: ptr::null_mut(),
             }),
-            Box::new(component::Exit{ scene: None, transform: Object::get_component(&scene.objects[2] as *const Object, "Transform").unwrap(), min: Vector3 { x: 0.5, y: -2.0, z: -4.5 }, max: Vector3 { x: 1.5, y: 2.0, z: -3.5 } })
+            Box::new(component::Exit {
+                scene: None,
+                transform: Object::get_component(&scene.objects[2] as *const Object, "Transform")
+                    .unwrap(),
+                min: Vector3 {
+                    x: 0.5,
+                    y: -2.0,
+                    z: -4.5,
+                },
+                max: Vector3 {
+                    x: 1.5,
+                    y: 2.0,
+                    z: -3.5,
+                },
+            }),
         ],
     });
     let swag = context as *const Context;
@@ -179,12 +196,10 @@ unsafe fn title(context: &Context) -> Scene {
                 model: Matrix4::from_translation(vec3(-1.0, -1.0, -4.0)).into(),
                 ..Default::default()
             }),
-            
             Box::new(component::MeshRenderer {
                 mesh: &context.meshes["start"],
                 prog: &context.shader_programs["door"],
-                uniforms: DynamicUniforms(collection! {
-                }),
+                uniforms: DynamicUniforms(collection! {}),
                 draw_parameters: glium::DrawParameters {
                     depth: glium::Depth {
                         test: glium::draw_parameters::DepthTest::IfLess,
@@ -224,23 +239,18 @@ unsafe fn title(context: &Context) -> Scene {
                 },
                 transform: ptr::null_mut(),
             }),
-            
         ],
     });
-    
-    
-    let bruh = Box::new(component::TheWackyEntrance {
-        timer: Duration::ZERO,
-        player: Object::get_component(&scene.objects[2] as *const Object, "Transform").unwrap(),
-        mesh_renderer: &*(scene.objects[4].components[2]) as *const dyn component::Component
+
+    let bruh = Box::new(component::TheWackyEntrance::new(
+        Object::get_component(&scene.objects[2] as *const Object, "Transform").unwrap(),
+        &*(scene.objects[4].components[2]) as *const dyn component::Component
             as *mut dyn component::Component as *mut MeshRenderer,
-        min: vec3(-1.5, -2.0, -4.5),
-        max: vec3(-0.5, 2.0, -3.5),
-        state: component::WackyState::Waiting,
-        currentFrame: 0,
-    });
+        vec3(-1.5, -2.0, -4.5),
+        vec3(-0.5, 2.0, -3.5),
+    ));
     scene.objects[4].components.push(bruh);
-    
+
     return scene;
 }
 use glium::texture::SrgbTexture2d;

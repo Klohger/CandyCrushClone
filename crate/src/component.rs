@@ -1,4 +1,4 @@
-use std::{collections::HashMap, f32::consts::PI, time::Duration, fs::File};
+use std::{collections::HashMap, f32::consts::PI, fs::File, time::Duration};
 
 use crate::{
     asset,
@@ -505,8 +505,27 @@ pub struct TheWackyEntrance {
     pub max: Vector3<f32>,
     pub state: WackyState,
     pub currentFrame: usize,
+    pub frames: Frames<'static>,
 }
 impl TheWackyEntrance {
+    pub fn new(
+        player: *const Transform,
+        mesh_renderer: *mut MeshRenderer,
+        min: Vector3<f32>,
+        max: Vector3<f32>,
+    ) -> Self {
+        Self {
+            timer: Duration::ZERO,
+            player,
+            mesh_renderer,
+            min,
+            max,
+            state : WackyState::Waiting,
+            currentFrame: 0,
+            frames: image::codecs::gif::GifDecoder::new(File::open("data/media/skyrim.gif").unwrap()).unwrap().into_frames(),
+        }
+    }
+
     pub const IDENTIFIER: &'static str = "🤡";
     const FADE_TIME: Duration = Duration::from_millis(1_500);
     const VIDEO_FADE_TIME: Duration = Duration::from_secs(3);
@@ -518,22 +537,10 @@ impl TheWackyEntrance {
         height: 144,
     };
 }
-use image::{io::Reader as ImageReader, ImageBuffer, Rgba, AnimationDecoder};
+use image::{io::Reader as ImageReader, AnimationDecoder, Frames, ImageBuffer, Rgba};
 impl Component for TheWackyEntrance {
     fn identifier(&self) -> &'static str {
         Self::IDENTIFIER
-    }
-    unsafe fn start_scene(
-        &mut self,
-        _object: *mut Object,
-        _scene: *mut Scene,
-        _context: &context::Context,
-    ) {
-        
-        let frames = image::codecs::gif::GifDecoder::new(File::open("data/media/skyrim.gif").unwrap()).unwrap().into_frames();
-        for frame in frames {
-            let swag = frame.unwrap();
-        }
     }
     unsafe fn update(
         &mut self,
@@ -575,18 +582,14 @@ impl Component for TheWackyEntrance {
                 self.timer += (*scene).delta;
                 context.sinks["trolos"].append(asset::load_audio("data/media/skyrim.ogg"));
                 context.sinks["trolos"].play();
-                let swag = ((self.timer.as_nanos() / Self::fps.as_nanos()) + 1) as usize;
+                let swag = (self.timer.as_nanos() / Self::fps.as_nanos()) as usize;
                 if swag > self.currentFrame {
                     self.currentFrame = swag;
+
                     context.textures["pain"].write(
                         Self::swag,
                         glium::texture::RawImage2d::from_raw_rgba_reversed(
-                            ImageReader::open(format!("data/media/skyrim/out{}.jpg", self.currentFrame))
-                                .unwrap()
-                                .decode()
-                                .unwrap()
-                                .to_rgba8()
-                                .as_raw(),
+                            self.frames.next().unwrap().unwrap().buffer().as_raw(),
                             (256, 144),
                         ),
                     );
