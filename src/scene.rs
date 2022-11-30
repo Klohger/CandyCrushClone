@@ -156,7 +156,7 @@ impl Scene {
     }
     pub unsafe fn draw(scene: *mut Scene, context: &context::Context) {
         let mut frame = (*context.display).draw();
-        frame.clear_color_and_depth((0.0, 0.0, 0.01, 1.0), 1.0);
+        frame.clear_color_and_depth((*scene).clear_color, 1.0);
         for object in &mut (*scene).objects {
             for component in &mut object.components {
                 component.draw(&mut (*scene), &mut frame, context);
