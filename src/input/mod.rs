@@ -236,6 +236,6 @@ impl Input {
 
 impl Default for Input {
     fn default() -> Self {
-        Self { keys: Default::default(), mouse_delta: Default::default(), scroll_delta: Default::default() }
+        return Input::new();
     }
 }
