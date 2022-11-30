@@ -1,3 +1,2 @@
-#shitGameengine2PLUSPLUSDELUXEEDITION
+# PlayMotor
 A game engine
-:trollface:
