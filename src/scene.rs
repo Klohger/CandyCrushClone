@@ -3,7 +3,7 @@ use std::time::{self, Instant};
 use cgmath::{Matrix4, SquareMatrix};
 use glium::{Display, Surface};
 
-use crate::{input::Input, object::Object, context};
+use crate::{context, input::Input, object::Object};
 
 pub enum NextScene {
     Another(Scene),
@@ -11,48 +11,122 @@ pub enum NextScene {
 }
 
 pub struct Scene {
-    pub view: [[f32;4];4],
-    pub inverted_view: [[f32;4];4],
-    pub proj: [[f32;4];4],
+    pub view: [[f32; 4]; 4],
+    pub proj: [[f32; 4]; 4],
     pub delta: time::Duration,
     pub next_frame_instant: time::Instant,
     pub objects: Vec<Object>,
     pub should_be_removed: Vec<bool>,
     pub input: Input,
+    pub clear_color: (f32, f32, f32, f32),
 }
 impl Default for Scene {
     fn default() -> Self {
-        Self { view: Default::default(), inverted_view: Default::default(), proj: Default::default(), delta: Default::default(), next_frame_instant: Instant::now(), objects: Default::default(), should_be_removed: Default::default(), input: Default::default() }
+        Self {
+            view: Matrix4::identity().into(),
+            proj: cgmath::perspective(
+                cgmath::Deg(90.0),
+                1920.0 / 1080.0 as f32,
+                0.05,
+                100.0,
+            )
+            .into(),
+            delta: time::Duration::from_nanos(1),
+            next_frame_instant: Instant::now(),
+            objects: vec![],
+            should_be_removed: vec![],
+            input: Default::default(),
+            clear_color: (0.0, 0.0, 0.0, 1.0),
+        }
     }
 }
 
 impl Scene {
     pub fn new(
+        display: &Display,
         objects: Vec<Object>,
         view: Matrix4<f32>,
-        display: &Display,
-        
+        clear_color: (f32, f32, f32, f32),
     ) -> Self {
-        let should_be_removed = vec![false; objects.len()];
 
         let size = display.gl_window().window().inner_size();
+        let should_be_removed = vec![false; objects.len()];
         return Self {
-            inverted_view : view.invert().unwrap().into(),
             objects,
             should_be_removed,
-            view: view.into(),
-            delta: time::Duration::from_nanos(1),
-            next_frame_instant: time::Instant::now(),
             proj: cgmath::perspective(
                 cgmath::Deg(90.0),
                 size.width as f32 / size.height as f32,
                 0.05,
                 100.0,
-            ).into(),
-            input: Input::new(),
+            )
+            .into(),
+            clear_color,
+            view: view.into(),
+            ..Default::default()
         };
     }
-    pub unsafe fn init(scene: *mut Scene, context : &context::Context) {
+    pub fn new_without_view_and_clear_color(display: &Display, objects: Vec<Object>) -> Self {
+        let size = display.gl_window().window().inner_size();
+        let should_be_removed = vec![false; objects.len()];
+        return Self {
+            objects,
+            should_be_removed,
+            proj: cgmath::perspective(
+                cgmath::Deg(90.0),
+                size.width as f32 / size.height as f32,
+                0.05,
+                100.0,
+            )
+            .into(),
+            ..Default::default()
+        };
+    }
+    pub fn new_without_clear_color(
+        display: &Display,
+        objects: Vec<Object>,
+        view: Matrix4<f32>,
+    ) -> Self {
+
+        let size = display.gl_window().window().inner_size();
+        let should_be_removed = vec![false; objects.len()];
+        return Self {
+            objects,
+            should_be_removed,
+            proj: cgmath::perspective(
+                cgmath::Deg(90.0),
+                size.width as f32 / size.height as f32,
+                0.05,
+                100.0,
+            )
+            .into(),
+            view: view.into(),
+            ..Default::default()
+        };
+    }
+    pub fn new_without_view(
+        display: &Display,
+        objects: Vec<Object>,
+        clear_color: (f32, f32, f32, f32),
+    ) -> Self {
+
+        let size = display.gl_window().window().inner_size();
+        let should_be_removed = vec![false; objects.len()];
+        return Self {
+            objects,
+            should_be_removed,
+            proj: cgmath::perspective(
+                cgmath::Deg(90.0),
+                size.width as f32 / size.height as f32,
+                0.05,
+                100.0,
+            )
+            .into(),
+            clear_color,
+            ..Default::default()
+        };
+    }
+    pub unsafe fn init(scene: *mut Scene, context: &context::Context) {
         for object in &mut (*scene).objects {
             let object = object as *mut Object;
             for component in &mut (*object).components {
@@ -66,7 +140,6 @@ impl Scene {
         now: time::Instant,
         refresh_rate: time::Duration,
     ) -> Option<NextScene> {
-        (*scene).inverted_view = Matrix4::from((*scene).view).invert().unwrap().into();
         (*scene).delta = refresh_rate + ((*scene).next_frame_instant - now);
         (*scene).next_frame_instant += (*scene).delta;
         for object in &mut (*scene).objects {
@@ -84,9 +157,9 @@ impl Scene {
     pub unsafe fn draw(scene: *mut Scene, context: &context::Context) {
         let mut frame = (*context.display).draw();
         frame.clear_color_and_depth((0.0, 0.0, 0.01, 1.0), 1.0);
-        for object in  &mut (*scene).objects {
+        for object in &mut (*scene).objects {
             for component in &mut object.components {
-                component.draw( &mut (*scene), &mut frame, context);
+                component.draw(&mut (*scene), &mut frame, context);
             }
         }
         frame.finish().unwrap();

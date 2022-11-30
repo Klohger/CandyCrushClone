@@ -4,6 +4,7 @@ use std::collections::HashMap;
 
 use crate::{context::{self, Context}, mesh::Mesh};
 
+use cgmath::{Matrix4, SquareMatrix};
 use glium::{Frame, DrawParameters, uniforms::{UniformValue, Uniforms, AsUniformValue}, Surface};
 
 use crate::{
@@ -178,7 +179,7 @@ impl Component for MeshRenderer {
             .insert("proj", (*scene).proj.as_uniform_value());
         self.uniforms
             .0
-            .insert("view", (*scene).inverted_view.as_uniform_value());
+            .insert("view", UniformValue::Mat4(Matrix4::from((*scene).view).invert().unwrap().into()));
         self.uniforms
             .0
             .insert("model", (*self.transform).model.as_uniform_value());
