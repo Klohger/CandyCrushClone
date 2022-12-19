@@ -33,7 +33,7 @@ impl Context {
         .unwrap();
 
         let mut scene = scene_func(&display, &self);
-        Scene::init(&mut scene as *mut Scene, &self);
+        Scene::init(&mut scene as *mut Scene, &display, &self);
 
         let mut should_exit = false;
         let refresh_rate = time::Duration::from_nanos(16_666_667);
@@ -44,11 +44,11 @@ impl Context {
             if now >= scene.next_frame_instant {
                 Scene::draw(&mut scene as *mut Scene, &display, &self);
 
-                match Scene::update(&mut scene as *mut Scene, &self, now, refresh_rate) {
+                match Scene::update(&mut scene as *mut Scene, &display,&self, now, refresh_rate) {
                     Some(next_scene) => match next_scene {
                         scene::NextScene::Another(new_scene) => {
                             scene = new_scene;
-                            Scene::init(&mut scene as *mut Scene, &self);
+                            Scene::init(&mut scene as *mut Scene, &display, &self);
                         }
                         scene::NextScene::Done => should_exit = true,
                     },

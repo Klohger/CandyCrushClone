@@ -190,16 +190,17 @@ impl Scene {
             ..Default::default()
         };
     }
-    pub unsafe fn init(scene: *mut Scene, context: &Context) {
+    pub unsafe fn init(scene: *mut Scene, display: &Display, context: &Context) {
         for object in &mut (*scene).objects {
             let object = object as *mut Object;
             for component in &mut (*object).components {
-                component.start_scene(object, scene, context);
+                component.start_scene(object, scene, display, context);
             }
         }
     }
     pub unsafe fn update(
         scene: *mut Scene,
+        display: &Display,
         context: &context::Context,
         now: time::Instant,
         refresh_rate: time::Duration,
@@ -209,7 +210,7 @@ impl Scene {
         for object in &mut (*scene).objects {
             let object = object as *mut Object;
             for component in &mut (*object).components {
-                let possitble = component.update(object, scene, context);
+                let possitble = component.update(object, scene, display, context);
                 if let Some(_) = possitble {
                     return possitble;
                 }
@@ -223,7 +224,7 @@ impl Scene {
         frame.clear_color_and_depth((*scene).clear_color, 1.0);
         for object in &mut (*scene).objects {
             for component in &mut object.components {
-                component.draw(&mut (*scene), &mut frame, context);
+                component.draw(&mut (*scene), &mut frame, display, context);
             }
         }
         frame.finish().unwrap();
