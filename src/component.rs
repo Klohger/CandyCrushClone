@@ -112,9 +112,9 @@ impl Component for Camera {
     }
 }
 
-pub struct MeshRenderer {
-    pub mesh: *const Mesh,
-    pub prog: *const glium::Program,
+pub struct MeshRenderer<'a> {
+    pub mesh: &'a Mesh,
+    pub prog: &'a glium::Program,
     pub uniforms: DynamicUniforms,
     pub draw_parameters: DrawParameters<'static>,
     pub transform: *const Transform,
@@ -158,10 +158,10 @@ macro_rules! dynamic_uniform {
     };
 }
 
-impl MeshRenderer {
+impl MeshRenderer<'_> {
     pub const IDENTIFIER: &'static str = "MeshRenderer";
 }
-impl Component for MeshRenderer {
+impl Component for MeshRenderer<'_> {
     fn identifier(&self) -> &'static str {
         Self::IDENTIFIER
     }
