@@ -54,7 +54,7 @@ impl Default for Scene {
 }
 
 impl Scene {
-    pub fn new<const NUM: usize, T>(
+    pub fn new<const NUM: usize>(
         context: &Context,
         display: &Display,
         objects: Vec<Object>,
@@ -90,7 +90,7 @@ impl Scene {
             ..Default::default()
         };
     }
-    pub fn new_without_view_and_clear_color<const NUM: usize, T>(
+    pub fn new_without_view_and_clear_color<const NUM: usize>(
         context: &Context,
         display: &Display,
         objects: Vec<Object>,
@@ -122,7 +122,7 @@ impl Scene {
             ..Default::default()
         };
     }
-    pub fn new_without_clear_color<const NUM: usize, T>(
+    pub fn new_without_clear_color<const NUM: usize>(
         context: &Context,
         display: &Display,
         objects: Vec<Object>,
@@ -156,7 +156,7 @@ impl Scene {
             ..Default::default()
         };
     }
-    pub fn new_without_view<const NUM: usize, T>(
+    pub fn new_without_view<const NUM: usize>(
         context: &Context,
         display: &Display,
         objects: Vec<Object>,
