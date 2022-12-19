@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use crate::{context::{self, Context}, mesh::Mesh};
 
 use cgmath::{Matrix4, SquareMatrix};
-use glium::{Frame, DrawParameters, uniforms::{UniformValue, Uniforms, AsUniformValue}, Surface};
+use glium::{Frame, DrawParameters, uniforms::{UniformValue, Uniforms, AsUniformValue}, Surface, Display};
 
 use crate::{
     object::Object,
@@ -16,20 +16,22 @@ pub trait Component {
     fn identifier(&self) -> &'static str;
     unsafe fn start_scene(
         &mut self,
-        _object: *mut Object,
-        _scene: *mut Scene,
-        _context: &context::Context,
+        object: *mut Object,
+        scene: *mut Scene,
+        display : &Display,
+        context: &context::Context,
     ) {
     }
     unsafe fn update(
         &mut self,
-        _object: *mut Object,
-        _scene: *mut Scene,
-        _context: &Context,
+        object: *mut Object,
+        scene: *mut Scene,
+        display : &Display,
+        context: &Context,
     ) -> Option<NextScene> {
         None
     }
-    unsafe fn draw(&mut self, _scene: *mut Scene, _frame: &mut Frame, _context: &Context) {}
+    unsafe fn draw(&mut self, scene: *mut Scene, frame: &mut Frame, display : &Display, context: &Context) {}
 }
 pub struct Transform {
     pub model: [[f32; 4]; 4],
@@ -98,13 +100,14 @@ impl Component for Camera {
     fn identifier(&self) -> &'static str {
         Self::IDENTIFIER
     }
-    unsafe fn start_scene(&mut self, object: *mut crate::object::Object, _scene: *mut crate::scene::Scene, _context: &crate::context::Context) {
+    unsafe fn start_scene(&mut self, object: *mut crate::object::Object, _scene: *mut crate::scene::Scene, _display : &Display, _context: &crate::context::Context) {
         self.transform = crate::object::Object::get_component(object, Transform::IDENTIFIER).unwrap();
     }
     unsafe fn update(
         &mut self,
         _object: *mut crate::object::Object,
         scene: *mut crate::scene::Scene,
+        _display : &Display,
         _context: &crate::context::Context,
     ) -> Option<crate::scene::NextScene> {
         (*scene).view = (*self.transform).model;
@@ -169,11 +172,12 @@ impl Component for MeshRenderer<'_> {
         &mut self,
         object: *mut Object,
         _scene: *mut Scene,
+        _display : &Display,
         _context: &context::Context,
     ) {
         self.transform = Object::get_component(object, "Transform").unwrap();
     }
-    unsafe fn draw(&mut self, scene: *mut Scene, frame: &mut Frame, _context: &Context) {
+    unsafe fn draw(&mut self, scene: *mut Scene, frame: &mut Frame, _display : &Display, _context: &Context) {
         self.uniforms
             .0
             .insert("proj", (*scene).proj.as_uniform_value());
