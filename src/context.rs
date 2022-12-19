@@ -20,7 +20,7 @@ impl Default for Context {
     }
 }
 impl Context {
-    pub fn new<const NUM: usize>() -> Self {
+    pub fn new() -> Self {
         Self::default()
     }
     pub unsafe fn start<T : ContextCurrentState>(self, scene_func: unsafe fn(&Display, &Context) -> Scene, wb : WindowBuilder, cb : ContextBuilder<'_, T>) {
