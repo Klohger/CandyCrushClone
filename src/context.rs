@@ -23,7 +23,7 @@ impl Context {
     pub fn new<const NUM: usize>() -> Self {
         Self::default()
     }
-    pub unsafe fn start<F: FnOnce(&Display, &Context) -> Scene, T : ContextCurrentState>(self, sceneFunc: F, wb : WindowBuilder, cb : ContextBuilder<'_, T>) {
+    pub unsafe fn start<T : ContextCurrentState>(self, scene_func: unsafe fn(&Display, &Context) -> Scene, wb : WindowBuilder, cb : ContextBuilder<'_, T>) {
         let events_loop = EventLoop::new();
         let display = Display::new(
             wb,
@@ -32,7 +32,7 @@ impl Context {
         )
         .unwrap();
 
-        let mut scene = sceneFunc(&display, &self);
+        let mut scene = scene_func(&display, &self);
         Scene::init(&mut scene as *mut Scene, &self);
 
         let mut should_exit = false;
