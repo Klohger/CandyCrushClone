@@ -1,6 +1,6 @@
 use std::{
     collections::HashMap,
-    time::{self, Instant},
+    time::{self, Instant}, sync::Arc,
 };
 
 use cgmath::{Matrix4, SquareMatrix};
@@ -18,6 +18,8 @@ pub enum NextScene {
     Another(Scene),
     Done,
 }
+
+pub static mut current : Arc<usize> = Arc::new(8);
 
 pub struct Scene {
     pub view: [[f32; 4]; 4],
